@@ -9,10 +9,10 @@
 
 #include "Arduino.h"
 
-/// @brief Texas Instruments DRV8833 advanced motor driver
+/// @brief DC motor driver library for Texas Instruments DRV8833
 class DRV8833 {
   public:
-    /// @brief DRV8833 motor driver constructor
+    /// @brief Constructor
     /// @param pin1 The first pin connected to the motor driver. Must always be PWM capable.
     /// @param pin2 The second pin connected to the motor driver. If the doublePWM is set to true, must also be PWM capable
     /// @param minInput Lower limit of the controlValue (minimum of controlValue)
