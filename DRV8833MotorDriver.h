@@ -51,7 +51,7 @@ void DRV8833MotorDriver::run() {
         //_filter.apply(_currentSpeed);
 
         // apply new speed
-        if (_motor.setMotorPwm(newSpeed)) {
+        if (!_motor.setMotorPwm(map(newSpeed, minSpeed, maxSpeed, -255, 255))) {
             LOG_DEBUG("    [DRV8833MotorDriver] Speed set to: ", newSpeed);
             _currentSpeed = newSpeed;
         } else {
