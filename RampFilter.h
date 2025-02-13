@@ -17,7 +17,7 @@ class RampFilter : public IFilter {
     explicit RampFilter();
     void begin(int targetValue, int time) override;
     int apply(int controlValue) override;
-    int rampTime = 500;
+    unsigned int rampTime = 500;
     int maxSpeed = 127;
     int minSpeed = -127;
 

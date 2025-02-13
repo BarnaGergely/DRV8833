@@ -28,6 +28,7 @@ void DRV8833::begin() {
     digitalWrite(_pin1, LOW);
     digitalWrite(_pin2, LOW);
     _isReady = true;
+    LOG_DEBUG("[DRV8833] Motor driver ready");
 }
 
 int DRV8833::setMotorPwm(int pwm) {
