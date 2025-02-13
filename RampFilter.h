@@ -22,7 +22,7 @@ class RampFilter : public IFilter {
     int minSpeed = -127;
 
    private:
-    boolean isRampEnabled() { rampTime >= 1; }
+    boolean isRampEnabled() { return rampTime >= 1; }
     unsigned long int _rampStartTime = 0;
 };
 
