@@ -8,12 +8,12 @@
 
 class DRV8833MotorDriver {
    public:
-    unsigned int rampTime = 500;
+    unsigned int rampTime = 1000;
     unsigned int neutralWidth = 0;
     int maxSpeed = 127;
     int minSpeed = -127;
 
-    DRV8833MotorDriver(DRV8833 motor, IFilter& filter);
+    DRV8833MotorDriver(DRV8833 motor, IFilter* filter);
     void begin();
     void run();
     int setSpeed(int speed);
@@ -29,7 +29,7 @@ class DRV8833MotorDriver {
     int setSpeedUnsafe(int speed);
 };
 
-DRV8833MotorDriver::DRV8833MotorDriver(DRV8833 motor, IFilter& filter) : _motor(motor), _filter(filter) {}
+DRV8833MotorDriver::DRV8833MotorDriver(DRV8833 motor, IFilter* filter = new RampFilter()) : _motor(motor), _filter(*filter) {}
 
 void DRV8833MotorDriver::begin() {
     _motor.begin();
@@ -46,16 +46,16 @@ void DRV8833MotorDriver::run() {
         LOG_DEBUG("    [DRV8833MotorDriver] Target speed: ", _targetSpeed);
 
         // calculate new speed
-        int newSpeed = _targetSpeed;
-        // TODO: calculate new speed
-        //_filter.apply(_currentSpeed);
+        int filteredSpeed = _filter.apply(_currentSpeed);
+
+        LOG_DEBUG("    [DRV8833MotorDriver] Filtered speed: ", filteredSpeed);
 
         // apply new speed
-        if (!_motor.setMotorPwm(map(newSpeed, minSpeed, maxSpeed, -255, 255))) {
-            LOG_DEBUG("    [DRV8833MotorDriver] Speed set to: ", newSpeed);
-            _currentSpeed = newSpeed;
+        if (!_motor.setMotorPwm(map(filteredSpeed, minSpeed, maxSpeed, -255, 255))) {
+            LOG_DEBUG("    [DRV8833MotorDriver] Speed set to: ", filteredSpeed);
+            _currentSpeed = filteredSpeed;
         } else {
-            LOG_ERROR("    [DRV8833MotorDriver] Failed to set speed: ", newSpeed);
+            LOG_ERROR("    [DRV8833MotorDriver] Failed to set speed: ", filteredSpeed);
         }
     }
 }
@@ -80,7 +80,7 @@ int DRV8833MotorDriver::stop() {
 int DRV8833MotorDriver::setSpeedUnsafe(int speed) {
     LOG_DEBUG("[DRV8833MotorDriver] Setting speed to: ", speed);
     _targetSpeed = speed;
-    _filter.begin(_targetSpeed, rampTime);
+    _filter.setTargetSpeed(_targetSpeed);
     run();  // call run() to apply change in case the loop() is blocked
     return 0;
 }

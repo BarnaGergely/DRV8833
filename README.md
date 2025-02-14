@@ -1,5 +1,14 @@
 # Advanced Arduino H-Bridge control library
 
+## Tasks
+
+- Create examples
+- Create docs
+- Create arduino library documents
+- Publish on Github, platform IO, Arduino
+- Create unniversal adapter architecture: Gabor sad that it is a bad idea, because I need to use a lot of defines and it will mess up the code.
+- [x] Add Fader Filter
+
 This is an Arduino library for the Texas Instruments DRV8833 DC motor driver
 
 ## Features:
