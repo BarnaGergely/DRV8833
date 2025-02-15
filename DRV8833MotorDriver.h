@@ -4,13 +4,13 @@
 #include <Arduino.h>
 #include <DRV8833.h>
 #include <SimpleDebugLog.h>
+
 #include "RampFilter.h"
 
 class DRV8833MotorDriver {
    public:
     IFilter& filter;
-    unsigned int rampTime = 1000;
-    unsigned int neutralWidth = 0;
+    unsigned int neutralWidth = 25;
     int maxSpeed = 127;
     int minSpeed = -127;
 
@@ -25,6 +25,7 @@ class DRV8833MotorDriver {
     boolean _isReady = false;
     int _currentSpeed = 0;
     int _targetSpeed = 0;
+    unsigned int _neutralPwmWidth = map(neutralWidth, 0, maxSpeed, 0, 255);
 
     int setSpeedUnsafe(int speed);
 };
@@ -50,12 +51,22 @@ void DRV8833MotorDriver::run() {
 
         LOG_DEBUG("    [DRV8833MotorDriver] Filtered speed: ", filteredSpeed);
 
+        // apply neutral width filtering
+        int neutralFilteredSpeed;
+        if (filteredSpeed > 0) {
+            neutralFilteredSpeed = map(filteredSpeed, 0, maxSpeed, _neutralPwmWidth, 255);
+        } else if (filteredSpeed < 0) {
+            neutralFilteredSpeed = map(filteredSpeed, minSpeed, 0, -255, -_neutralPwmWidth);
+        } else {
+            neutralFilteredSpeed = 0;
+        }
+
         // apply new speed
-        if (!_motor.setMotorPwm(map(filteredSpeed, minSpeed, maxSpeed, -255, 255))) {
-            LOG_DEBUG("    [DRV8833MotorDriver] Speed set to: ", filteredSpeed);
+        if (!_motor.setMotorPwm(neutralFilteredSpeed)) {
+            LOG_DEBUG("    [DRV8833MotorDriver] Motor PWM set to: ", neutralFilteredSpeed);
             _currentSpeed = filteredSpeed;
         } else {
-            LOG_ERROR("    [DRV8833MotorDriver] Failed to set speed: ", filteredSpeed);
+            LOG_ERROR("    [DRV8833MotorDriver] Failed to set motor PWM: ", neutralFilteredSpeed);
         }
     }
 }
