@@ -6,11 +6,28 @@
 
 class DRV8833 {
    public:
+
+    /**
+     * @brief Construct a new DRV8833 object
+     *
+     * @param pin1 The first pin of the motor driver
+     * @param pin2 The second pin of the motor driver
+     * @param isInverted If the motor driver's direction is inverted
+     */
     DRV8833(int pin1, int pin2, boolean isInverted);
-    /// @brief Initialize the motor driver. Must be called before using the motor in the setup() function.
+
+    /**
+     * @brief Initialize the motor driver. Must be called before using the motor in the setup() function.
+     *
+     */
     void begin();
-    /// @brief Set the current on a motor channel using PWM and directional logic.
-    /// @param pwm PWM duty cycle ranging from -255 full reverse to 255 full forward
+    
+    /**
+     * @brief Set the current on a motor channel using PWM and directional logic.
+     *
+     * @param pwm PWM duty cycle ranging from -255 full reverse to 255 full forward
+     * @return int 0 if the PWM is set successfully, -1 if not or the motor is not ready.
+     */
     int setMotorPwm(int pwm);
 
    private:
@@ -40,7 +57,7 @@ int DRV8833::setMotorPwm(int pwm) {
         LOG_ERROR("[DRV8833] Motor not ready. Please call begin() before using this motor driver.");
         return -1;
     }
-    if (_isInverted) { // invert driving direction
+    if (_isInverted) {  // invert driving direction
         pwm = -pwm;
     }
     if (pwm < 0) {  // reverse speeds

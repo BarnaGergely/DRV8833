@@ -2,6 +2,8 @@
 
 ## Tasks
 
+- Add deadzone (or something like that)
+- add speed limit
 - Create examples
 - Create docs
 - Create arduino library documents

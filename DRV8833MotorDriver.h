@@ -8,20 +8,20 @@
 
 class DRV8833MotorDriver {
    public:
+    IFilter& filter;
     unsigned int rampTime = 1000;
     unsigned int neutralWidth = 0;
     int maxSpeed = 127;
     int minSpeed = -127;
 
-    DRV8833MotorDriver(DRV8833 motor, IFilter* filter);
+    DRV8833MotorDriver(DRV8833& motor);
     void begin();
     void run();
     int setSpeed(int speed);
     int stop();
 
    private:
-    DRV8833 _motor;
-    IFilter& _filter;
+    DRV8833& _motor;
     boolean _isReady = false;
     int _currentSpeed = 0;
     int _targetSpeed = 0;
@@ -29,7 +29,7 @@ class DRV8833MotorDriver {
     int setSpeedUnsafe(int speed);
 };
 
-DRV8833MotorDriver::DRV8833MotorDriver(DRV8833 motor, IFilter* filter = new RampFilter()) : _motor(motor), _filter(*filter) {}
+DRV8833MotorDriver::DRV8833MotorDriver(DRV8833& motor) : _motor(motor), filter(*new RampFilter()) {}
 
 void DRV8833MotorDriver::begin() {
     _motor.begin();
@@ -46,7 +46,7 @@ void DRV8833MotorDriver::run() {
         LOG_DEBUG("    [DRV8833MotorDriver] Target speed: ", _targetSpeed);
 
         // calculate new speed
-        int filteredSpeed = _filter.apply(_currentSpeed);
+        int filteredSpeed = filter.apply(_currentSpeed);
 
         LOG_DEBUG("    [DRV8833MotorDriver] Filtered speed: ", filteredSpeed);
 
@@ -80,7 +80,7 @@ int DRV8833MotorDriver::stop() {
 int DRV8833MotorDriver::setSpeedUnsafe(int speed) {
     LOG_DEBUG("[DRV8833MotorDriver] Setting speed to: ", speed);
     _targetSpeed = speed;
-    _filter.setTargetSpeed(_targetSpeed);
+    filter.setTargetSpeed(_targetSpeed);
     run();  // call run() to apply change in case the loop() is blocked
     return 0;
 }
