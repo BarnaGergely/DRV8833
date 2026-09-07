@@ -10,7 +10,7 @@
 /**
  * @brief Provides bounded, ramped speed control for a DRV8833 motor.
  */
-class DRV8833MotorDriver {
+class MotorController {
    public:
     /** The ramp filter used to smooth speed changes. */
     RampFilter filter;
@@ -25,7 +25,7 @@ class DRV8833MotorDriver {
      * @brief Constructs a motor driver around an initialized motor channel.
      * @param motor The low-level DRV8833 motor to control.
      */
-    DRV8833MotorDriver(DRV8833& motor);
+    MotorController(DRV8833& motor);
 
     /** @brief Initializes the motor channel and ramp filter. */
     void begin();
@@ -56,27 +56,27 @@ class DRV8833MotorDriver {
     int setSpeedUnsafe(int speed);
 };
 
-inline DRV8833MotorDriver::DRV8833MotorDriver(DRV8833& motor) : _motor(motor) {}
+inline MotorController::MotorController(DRV8833& motor) : _motor(motor) {}
 
-inline void DRV8833MotorDriver::begin() {
+inline void MotorController::begin() {
     _motor.begin();
     filter.begin();
     _neutralPwmWidth = map(neutralWidth, 0, maxSpeed, 0, 255);
-    LOG_DEBUG("[DRV8833MotorDriver] Motor driver ready");
+    LOG_DEBUG("[MotorController] Motor driver ready");
     _isReady = true;
 }
 
-inline void DRV8833MotorDriver::run() {
+inline void MotorController::run() {
     // if the current speed of the motor is not the target speed
     if (_currentSpeed != _targetSpeed) {
-        LOG_DEBUG("[DRV8833MotorDriver] Motor speed change detected.");
-        LOG_DEBUG("    [DRV8833MotorDriver] Current speed: ", _currentSpeed);
-        LOG_DEBUG("    [DRV8833MotorDriver] Target speed: ", _targetSpeed);
+        LOG_DEBUG("[MotorController] Motor speed change detected.");
+        LOG_DEBUG("    [MotorController] Current speed: ", _currentSpeed);
+        LOG_DEBUG("    [MotorController] Target speed: ", _targetSpeed);
 
         // calculate new speed
         int filteredSpeed = filter.apply(_currentSpeed);
 
-        LOG_DEBUG("    [DRV8833MotorDriver] Filtered speed: ", filteredSpeed);
+        LOG_DEBUG("    [MotorController] Filtered speed: ", filteredSpeed);
 
         // apply neutral width filtering
         int neutralFilteredSpeed;
@@ -90,37 +90,37 @@ inline void DRV8833MotorDriver::run() {
 
         // apply new speed
         if (!_motor.setMotorPwm(neutralFilteredSpeed)) {
-            LOG_DEBUG("    [DRV8833MotorDriver] Motor PWM set to: ", neutralFilteredSpeed);
+            LOG_DEBUG("    [MotorController] Motor PWM set to: ", neutralFilteredSpeed);
             _currentSpeed = filteredSpeed;
         } else {
-            LOG_ERROR("    [DRV8833MotorDriver] Failed to set motor PWM: ", neutralFilteredSpeed);
+            LOG_ERROR("    [MotorController] Failed to set motor PWM: ", neutralFilteredSpeed);
         }
     }
 }
 
-inline int DRV8833MotorDriver::setSpeed(int speed) {
+inline int MotorController::setSpeed(int speed) {
     if (!_isReady) {
-        LOG_ERROR("[DRV8833MotorDriver] Not ready. Please call begin() in the setup() function before using the motor driver.");
+        LOG_ERROR("[MotorController] Not ready. Please call begin() in the setup() function before using the motor driver.");
         return -1;
     }
     if (speed < minSpeed || speed > maxSpeed) {
-        LOG_ERROR("[DRV8833MotorDriver] Speed out of range: ", speed);
+        LOG_ERROR("[MotorController] Speed out of range: ", speed);
         return -1;
     }
     return setSpeedUnsafe(speed);
 }
 
-inline int DRV8833MotorDriver::stop() {
+inline int MotorController::stop() {
     if (!_isReady) {
-        LOG_ERROR("[DRV8833MotorDriver] Not ready. Please call begin() in the setup() function before stopping the motor.");
+        LOG_ERROR("[MotorController] Not ready. Please call begin() in the setup() function before stopping the motor.");
         return -1;
     }
-    LOG_DEBUG("[DRV8833MotorDriver] Stopping motor");
+    LOG_DEBUG("[MotorController] Stopping motor");
     return setSpeedUnsafe(0);
 }
 
-inline int DRV8833MotorDriver::setSpeedUnsafe(int speed) {
-    LOG_DEBUG("[DRV8833MotorDriver] Setting speed to: ", speed);
+inline int MotorController::setSpeedUnsafe(int speed) {
+    LOG_DEBUG("[MotorController] Setting speed to: ", speed);
     _targetSpeed = speed;
     filter.setTargetSpeed(_targetSpeed);
     run();  // call run() to apply change in case the loop() is blocked

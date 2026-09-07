@@ -7,7 +7,7 @@
 #######################################
 
 DRV8833	KEYWORD1
-DRV8833MotorDriver	KEYWORD1
+MotorController	KEYWORD1
 RampFilter	KEYWORD1
 
 #######################################

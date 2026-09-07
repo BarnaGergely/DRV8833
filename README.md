@@ -37,7 +37,7 @@ Include `DRV8833MotorDriver.h`, construct a low-level motor and a motor driver, 
 #include <DRV8833MotorDriver.h>
 
 DRV8833 motor(5, 6);
-DRV8833MotorDriver driver(motor);
+MotorController driver(motor);
 
 void setup() {
   driver.begin();

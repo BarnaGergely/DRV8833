@@ -5,7 +5,7 @@ const int motorIn1 = 5;
 const int motorIn2 = 6;
 
 DRV8833 motor(motorIn1, motorIn2);
-DRV8833MotorDriver driver(motor);
+MotorController driver(motor);
 
 void setup() {
   Serial.begin(115200);
