@@ -1,4 +1,8 @@
-#include <DRV8833MotorDriver.h>
+#include <MotorController.h>
+
+// Example usage of the MotorController class with a DRV8833 motor driver.
+// Recommended for beginners, as it provides a simple interface for controlling 
+// and safety features like speed ramping and speed limiting.
 
 // Both pins should support PWM for variable speed in both directions.
 const int motorIn1 = 5;

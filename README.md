@@ -1,4 +1,4 @@
-# DRV8833 Arduino library
+# DRV8833 DC Motor Driver Arduino and ESP32 library
 
 A non-blocking Arduino library compatible with ESP32 and ESP8266 for controlling DC motors with the Texas Instruments DRV8833 dual H-bridge motor driver.
 
@@ -78,9 +78,10 @@ void loop() {
 }
 ```
 
-## Example
+## Examples
 
-Open `examples/DRV8833/DRV8833.ino` in the Arduino IDE. It reads a potentiometer on `A0` and maps it to the configured signed speed range.
+- Open `examples/DRV8833/DRV8833.ino` to use `MotorController`. It reads a potentiometer on `A0` and maps it to the configured signed speed range.
+- Open `examples/DirectPwm/DirectPwm.ino` to use `DRV8833.h` directly. It maps a potentiometer on `A0` to the full `-255..255` PWM range.
 
 ## Tasks
 
