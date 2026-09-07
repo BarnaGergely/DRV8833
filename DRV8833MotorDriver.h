@@ -7,17 +7,43 @@
 
 #include "RampFilter.h"
 
+/**
+ * @brief Provides bounded, ramped speed control for a DRV8833 motor.
+ */
 class DRV8833MotorDriver {
    public:
-    IFilter& filter;
+    /** The ramp filter used to smooth speed changes. */
+    RampFilter filter;
+    /** Width of the neutral compensation range in speed units. */
     unsigned int neutralWidth = 25;
+    /** Maximum accepted forward speed. */
     int maxSpeed = 127;
+    /** Minimum accepted reverse speed. */
     int minSpeed = -127;
 
+    /**
+     * @brief Constructs a motor driver around an initialized motor channel.
+     * @param motor The low-level DRV8833 motor to control.
+     */
     DRV8833MotorDriver(DRV8833& motor);
+
+    /** @brief Initializes the motor channel and ramp filter. */
     void begin();
+
+    /** @brief Advances the motor toward its target speed. */
     void run();
+
+    /**
+     * @brief Sets the target speed.
+     * @param speed Speed between minSpeed and maxSpeed.
+     * @return 0 on success, or -1 if the driver is not ready or the speed is out of range.
+     */
     int setSpeed(int speed);
+
+    /**
+     * @brief Requests a ramped stop.
+     * @return 0 on success, or -1 if the driver is not ready.
+     */
     int stop();
 
    private:
@@ -30,16 +56,17 @@ class DRV8833MotorDriver {
     int setSpeedUnsafe(int speed);
 };
 
-DRV8833MotorDriver::DRV8833MotorDriver(DRV8833& motor) : _motor(motor), filter(*new RampFilter()) {}
+inline DRV8833MotorDriver::DRV8833MotorDriver(DRV8833& motor) : _motor(motor) {}
 
-void DRV8833MotorDriver::begin() {
+inline void DRV8833MotorDriver::begin() {
     _motor.begin();
+    filter.begin();
+    _neutralPwmWidth = map(neutralWidth, 0, maxSpeed, 0, 255);
     LOG_DEBUG("[DRV8833MotorDriver] Motor driver ready");
     _isReady = true;
 }
 
-void DRV8833MotorDriver::run() {
-    // TODO: 0 is not working, Fix it!
+inline void DRV8833MotorDriver::run() {
     // if the current speed of the motor is not the target speed
     if (_currentSpeed != _targetSpeed) {
         LOG_DEBUG("[DRV8833MotorDriver] Motor speed change detected.");
@@ -71,7 +98,7 @@ void DRV8833MotorDriver::run() {
     }
 }
 
-int DRV8833MotorDriver::setSpeed(int speed) {
+inline int DRV8833MotorDriver::setSpeed(int speed) {
     if (!_isReady) {
         LOG_ERROR("[DRV8833MotorDriver] Not ready. Please call begin() in the setup() function before using the motor driver.");
         return -1;
@@ -83,12 +110,16 @@ int DRV8833MotorDriver::setSpeed(int speed) {
     return setSpeedUnsafe(speed);
 }
 
-int DRV8833MotorDriver::stop() {
+inline int DRV8833MotorDriver::stop() {
+    if (!_isReady) {
+        LOG_ERROR("[DRV8833MotorDriver] Not ready. Please call begin() in the setup() function before stopping the motor.");
+        return -1;
+    }
     LOG_DEBUG("[DRV8833MotorDriver] Stopping motor");
     return setSpeedUnsafe(0);
 }
 
-int DRV8833MotorDriver::setSpeedUnsafe(int speed) {
+inline int DRV8833MotorDriver::setSpeedUnsafe(int speed) {
     LOG_DEBUG("[DRV8833MotorDriver] Setting speed to: ", speed);
     _targetSpeed = speed;
     filter.setTargetSpeed(_targetSpeed);

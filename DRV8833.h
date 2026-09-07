@@ -4,6 +4,9 @@
 #include <Arduino.h>
 #include <SimpleDebugLog.h>
 
+/**
+ * @brief Controls one DC motor channel of a DRV8833 H-bridge.
+ */
 class DRV8833 {
    public:
 
@@ -14,7 +17,7 @@ class DRV8833 {
      * @param pin2 The second pin of the motor driver
      * @param isInverted If the motor driver's direction is inverted
      */
-    DRV8833(int pin1, int pin2, boolean isInverted);
+    DRV8833(int pin1, int pin2, boolean isInverted = false);
 
     /**
      * @brief Initialize the motor driver. Must be called before using the motor in the setup() function.
@@ -37,9 +40,9 @@ class DRV8833 {
     boolean _isReady = false;
 };
 
-DRV8833::DRV8833(int pin1, int pin2, boolean isInverted) : _pin1(pin1), _pin2(pin2), _isInverted(isInverted) {}
+inline DRV8833::DRV8833(int pin1, int pin2, boolean isInverted) : _pin1(pin1), _pin2(pin2), _isInverted(isInverted) {}
 
-void DRV8833::begin() {
+inline void DRV8833::begin() {
     pinMode(_pin1, OUTPUT);
     pinMode(_pin2, OUTPUT);
     digitalWrite(_pin1, LOW);
@@ -48,7 +51,7 @@ void DRV8833::begin() {
     LOG_DEBUG("[DRV8833] Motor driver ready");
 }
 
-int DRV8833::setMotorPwm(int pwm) {
+inline int DRV8833::setMotorPwm(int pwm) {
     if (pwm < -255 || pwm > 255) {
         LOG_ERROR("[DRV8833] PWM out of range: ", pwm);
         return -1;

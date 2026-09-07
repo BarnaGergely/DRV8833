@@ -1,30 +1,87 @@
-# Advanced Arduino H-Bridge control library
+# DRV8833 Arduino library
 
-## Tasks
+An Arduino library for controlling DC motors with the Texas Instruments DRV8833 dual H-bridge motor driver.
 
-- Add deadzone (or something like that)
-- add speed limit
-- Create examples
-- Create docs
-- Create arduino library documents
-- Publish on Github, platform IO, Arduino
-- Create unniversal adapter architecture: Gabor sad that it is a bad idea, because I need to use a lot of defines and it will mess up the code.
-- [x] Add Fader Filter
+## Features
 
-This is an Arduino library for the Texas Instruments DRV8833 DC motor driver
+- Signed speed control with configurable minimum and maximum speed values.
+- Software direction inversion.
+- Optional ramp filtering for smoother acceleration and deceleration.
+- Neutral-width compensation for motors that need a higher duty cycle to start moving.
+- Header-only non-blocking implementation with no dynamic allocation.
 
-## Features:
-- Adjustable fader for smooth speed changes
-- 3 brake modes: no brake (floating motor), brake active, if PWM > 0, brake always active
-- "Light" operation mode, if only one PWM capable pin is available. The brake is then always active in one direction and inactive in the other
-- selectable input signal range (e.g. 0 - 100, 0 - 1023, -255 - 255 etc.)
-- selectable neutral position width. This allows you to optimize it for your joystick
-- the motor rotation direction is reversible in software, so you don't have to switch your motor wires, if the direction is reversed
-- The end-speed is adjustable during runtime. This allows you to simulate different gear ratios
+## Installation
 
-## Usage
+In the Arduino IDE, use **Sketch > Include Library > Add .ZIP Library...** and select a ZIP of this repository. The library can also be installed through the Arduino Library Manager after publication.
 
-See [example](https://github.com/TheDIYGuy999/DRV8833/blob/master/examples/DRV8833/DRV8833.ino).
+## Wiring
 
+Connect one motor to `AOUT1` and `AOUT2` on the DRV8833 breakout board. Connect the corresponding logic inputs to two Arduino pins:
 
-(c) 2016 TheDIYGuy999
+| DRV8833 | Arduino |
+| --- | --- |
+| AIN1 | `motorIn1` |
+| AIN2 | `motorIn2` |
+| GND | GND |
+| VM | Motor power supply |
+
+The motor supply, logic supply, and current limit must follow the requirements of the specific DRV8833 breakout board. Do not power the motor from an Arduino I/O pin.
+
+For variable speed in both directions, use PWM-capable pins for both inputs. The library drives one input with PWM and holds the other low for each direction.
+
+## Basic usage
+
+Include `DRV8833MotorDriver.h`, construct a low-level motor and a motor driver, then call `begin()` from `setup()`:
+
+```cpp
+#include <DRV8833MotorDriver.h>
+
+DRV8833 motor(5, 6);
+DRV8833MotorDriver driver(motor);
+
+void setup() {
+  driver.begin();
+}
+
+void loop() {
+  driver.setSpeed(80); // Forward, from minSpeed to maxSpeed.
+  driver.run();
+}
+```
+
+`setSpeed()` accepts values from `minSpeed` through `maxSpeed` (both default to `-127` and `127`). Call `run()` regularly to advance the ramp. `stop()` sets the target speed to zero. Call `begin()` before `setSpeed()`, `run()`, or `stop()`.
+
+## Ramp filter
+
+The `RampFilter` is available as `driver.filter`:
+
+```cpp
+driver.filter.setFilterFactor(20); // Speed units per 100 ms.
+driver.setSpeed(driver.maxSpeed);
+```
+
+Set the factor to `0` to disable ramping. A disabled filter applies the target speed on the next `run()` call.
+
+## Direct PWM control
+
+For applications that do not need speed limits or ramping, use `DRV8833` directly. `setMotorPwm()` accepts `-255` to `255`, where negative values reverse the motor:
+
+```cpp
+DRV8833 motor(5, 6, true); // Optional direction inversion.
+
+void setup() {
+  motor.begin();
+}
+
+void loop() {
+  motor.setMotorPwm(150);
+}
+```
+
+## Example
+
+Open `examples/DRV8833/DRV8833.ino` in the Arduino IDE. It reads a potentiometer on `A0` and maps it to the configured signed speed range.
+
+## License
+
+MIT. See [LICENSE.txt](LICENSE.txt).

@@ -6,10 +6,21 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-DRV8833	KEYWORD
+DRV8833	KEYWORD1
+DRV8833MotorDriver	KEYWORD1
+RampFilter	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-drive	KEYWORD2
+begin	KEYWORD2
+run	KEYWORD2
+setMotorPwm	KEYWORD2
+setSpeed	KEYWORD2
+stop	KEYWORD2
+setTargetSpeed	KEYWORD2
+setFilterFactor	KEYWORD2
+getFilterFactor	KEYWORD2
+disable	KEYWORD2
+apply	KEYWORD2

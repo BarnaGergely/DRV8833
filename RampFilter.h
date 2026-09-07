@@ -5,81 +5,16 @@
 #include <SimpleDebugLog.h>
 
 /**
- * @brief Interface for filters that can be applied to motor speed.
- *
- */
-class IFilter {
-   public:
-    /**
-     * @brief Initialize the filter. Please call this method from void setup() before using the filter.
-     *
-     */
-    virtual void begin() = 0;
-
-    /**
-     * @brief Set the target speed for the filter. The filter will start approaching the target speed with apply() method.
-     *
-     * @param targetSpeed The target speed to reach.
-     * @return int 0 if the target speed is set successfully, -1 if not (the filter is not enabled or ready).
-     *
-     */
-    virtual int setTargetSpeed(int targetSpeed) = 0;
-
-    /**
-     * @brief Set the "strength" of the filter. The higher the value, the slower the motor speed will change.
-     *
-     * @param filterFactor Filter factor to set
-     *
-     */
-    virtual void setFilterFactor(int filterFactor) = 0;
-
-    /**
-     * @brief Get the "strength" of the filter.
-     *
-     * @return int Filter factor
-     *
-     */
-    virtual int getFilterFactor() = 0;
-
-    /**
-     * @brief Disable the filter.
-     *
-     */
-    virtual void disable() = 0;
-
-    /**
-     * @brief Apply the filter to the current speed. Call this method in a void loop() to get frequently updated speed after setting the target speed.
-     *
-     * @param currentSpeed The current speed of the motor.
-     * @return int The new speed after applying the filter.
-     *
-     */
-    virtual int apply(int currentSpeed) = 0;
-
-    /**
-     * @brief Destroy the IFilter object
-     *
-     */
-    virtual ~IFilter() = default;
-};
-
-/**
  *  @brief Acceleration Fader Filter: allows to ramp the motor speed slowly up and down to prevent damage and make the movement smoother, more realistic.
  *
  */
-class RampFilter : public IFilter {
+class RampFilter {
    public:
-    /**
-     * @brief Acceleration Fader Filter: allows to ramp the motor speed slowly up and down to prevent damage and make the movement smoother, more realistic
-     *
-     */
+    /** @brief Acceleration Fader Filter: allows to ramp the motor speed slowly up and down to prevent damage and make the movement smoother, more realistic. */
     explicit RampFilter();
 
-    /**
-     * @brief Initialize the Ramp filter. Please call this method from void setup() before using the filter.
-     *
-     */
-    void begin() override;
+    /** @brief Initialize the Ramp filter. Please call this method from void setup() before using the filter.*/
+    void begin();
 
     /**
      * @brief Set the target speed for the ramp filter. The filter will start approaching the target speed with apply() method.
@@ -87,7 +22,7 @@ class RampFilter : public IFilter {
      * @param targetSpeed The target speed to reach.
      * @return int 0 if the target speed is set successfully, -1 if not or the ramp filter is not enabled.
      */
-    int setTargetSpeed(int targetSpeed) override;
+    int setTargetSpeed(int targetSpeed);
 
     /**
      * @brief Apply the filter to the current speed. Call this method in a void loop() to get frequently updated speed after setting the target speed.
@@ -96,12 +31,9 @@ class RampFilter : public IFilter {
      * @return int The new speed after applying the filter.
      *
      */
-    int apply(int currentSpeed) override;
+    int apply(int currentSpeed);
 
-    /**
-     * @brief motor acceleration/descelleration in 1 step/100 milliseconds. To disable the filter, set it to 0.
-     *
-     */
+    /** @brief motor acceleration/descelleration in 1 step/100 milliseconds. To disable the filter, set it to 0. */
     unsigned int acceleration = 10;
 
     /**
@@ -110,20 +42,18 @@ class RampFilter : public IFilter {
      * @param filterFactor Acceleration to set
      *
      */
-    void setFilterFactor(int filterFactor) override { acceleration = filterFactor; }
+    void setFilterFactor(int filterFactor) { acceleration = filterFactor; }
 
     /**
      * @brief Get the Filter Factor number
      *
      * @return int acceleration
      */
-    int getFilterFactor() override { return acceleration; }
+    /** @brief Returns the configured ramp rate. */
+    int getFilterFactor() { return acceleration; }
 
-    /**
-     * @brief Disable the filter
-     *
-     */
-    void disable() override { acceleration = 0; }
+    /** @brief Disables ramping so the target is applied immediately. */
+    void disable() { acceleration = 0; }
 
    private:
     boolean isFilterEnabled() { return acceleration > 0; }
